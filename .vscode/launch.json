@@ -1,0 +1,16 @@
+{
+  "configurations": [
+    {
+      "type": "lldb-dap",
+      "request": "launch",
+      "name": "Run File",
+      "program": "odin",
+      "args": ["run", "${file}", "-file", "-o:speed"],
+      "env": {
+        "ODIN_ROOT": "/Users/binarytales/Development/Odin/odin"
+        // "OLS_BUILTIN_FOLDER": "/Users/binarytales/Development/Odin/odin"
+      },
+      "cwd": "${workspaceFolder}"
+    }
+  ]
+}

@@ -1,0 +1,10 @@
+**/.DS_Store
+**/Thumbs.db
+
+odin
+odin-**
+odin-**/**/*
+
+darwin
+
+**.bin
