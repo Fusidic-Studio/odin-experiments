@@ -12,6 +12,8 @@ import "core:os"
 import "core:terminal/ansi"
 import ray "vendor:raylib"
 
+debugMessage: string
+
 // Main
 // ******************************************************************************
 main :: proc() {
@@ -172,11 +174,14 @@ game :: proc() {
 		)
 	}
 
+	// MARK: Primary Camera
 	camera := ray.Camera3D {
 		// position   = {f32(gridWidth) / 2, 25, (f32(gridHeight) / 2) + 1},
 		// target     = {f32(gridWidth) / 2, 0, f32(gridHeight) / 2},
-		position   = {0, f32(math.max(gridWidth, gridHeight)) * 1.5, 1},
+		position   = {0, 23.5, 1},
 		target     = {0, 0, 0},
+		// position   = {4, 9, 8},
+		// target     = {1.8, 2.2, 2.7},
 		up         = {0, 1, 0},
 		fovy       = 45,
 		// projection = .ORTHOGRAPHIC,
@@ -244,7 +249,7 @@ game :: proc() {
 		sphereShader,
 		"instanceTransform",
 	)
-	sphere_material.shader = sphereShader
+	// sphere_material.shader = sphereShader
 
 	// MARK: Points & Spans
 	points: [dynamic]Point
@@ -379,58 +384,64 @@ game :: proc() {
 		groundHitInfo := ray.GetRayCollisionQuad(mouseRay, c0, c1, c2, c3)
 
 		// log.info(groundHitInfo)
-		mouseTarget := ray.Vector3{0, 0, 0}
+		mouseTarget := ray.Vector3(0)
 
-		if ((groundHitInfo.hit) && (groundHitInfo.distance < libc.INFINITY)) {
+		itsaHit := (groundHitInfo.hit) && (groundHitInfo.distance < libc.INFINITY)
+
+		if (itsaHit) {
 			mouseTarget = groundHitInfo.point
+
+			sqrt3x := (math.SQRT_THREE * mouseTarget.x)
+
+			squiffiffyU := sqrt3x - mouseTarget.z
+			targetU := math.copy_sign(
+				math.trunc((math.abs(squiffiffyU)) / math.SQRT_THREE) + 1,
+				squiffiffyU,
+			)
+
+			squiffiffyX := sqrt3x + mouseTarget.z
+			targetW := math.copy_sign(
+				math.trunc((math.abs(squiffiffyX)) / math.SQRT_THREE) + 1,
+				squiffiffyX,
+			)
+
+			targetV := math.copy_sign(
+				math.trunc(math.abs(mouseTarget.z) / isoMagicNumber) + 1,
+				mouseTarget.z,
+			)
+
+			targetSum := targetU + targetV + (targetW * -1)
+
+			targetSignSum := math.sign(targetU) + math.sign(targetV) + math.sign(targetW)
+
+			targetSumSum := targetSum + (targetSignSum * 2)
+
+			chirality: Chirality = .Unknown
+
+			switch targetSumSum {
+			case -7:
+				chirality = .Positive
+			case -6:
+				chirality = .Negative
+			case -2:
+				chirality = .Positive
+			case -1:
+				chirality = .Negative
+			case 1:
+				chirality = .Positive
+			case 2:
+				chirality = .Negative
+			case 6:
+				chirality = .Positive
+			case 7:
+				chirality = .Negative
+			}
+			targetTriangle = {targetU, targetV, targetW, chirality}
+
+
+		} else {
+			targetTriangle = {-0, -0, -0, .Unknown}
 		}
-
-		sqrt3x := (math.SQRT_THREE * mouseTarget.x)
-
-		squiffiffyU := sqrt3x - mouseTarget.z
-		targetU := math.copy_sign(
-			math.trunc((math.abs(squiffiffyU)) / math.SQRT_THREE) + 1,
-			squiffiffyU,
-		)
-
-		squiffiffyX := sqrt3x + mouseTarget.z
-		targetW := math.copy_sign(
-			math.trunc((math.abs(squiffiffyX)) / math.SQRT_THREE) + 1,
-			squiffiffyX,
-		)
-
-		targetV := math.copy_sign(
-			math.trunc(math.abs(mouseTarget.z) / isoMagicNumber) + 1,
-			mouseTarget.z,
-		)
-
-		targetSum := targetU + targetV + (targetW * -1)
-
-		targetSignSum := math.sign(targetU) + math.sign(targetV) + math.sign(targetW)
-
-		targetSumSum := targetSum + (targetSignSum * 2)
-
-		upOrDown := "???"
-
-		switch targetSumSum {
-		case -7:
-			upOrDown = "Up"
-		case -6:
-			upOrDown = "Down"
-		case -2:
-			upOrDown = "Up"
-		case -1:
-			upOrDown = "Down"
-		case 1:
-			upOrDown = "Up"
-		case 2:
-			upOrDown = "Down"
-		case 6:
-			upOrDown = "Up"
-		case 7:
-			upOrDown = "Down"
-		}
-		targetTriangle = {targetU, targetV, targetW, targetSum, upOrDown}
 
 		// MARK: Start Drawing
 		// ******************************************************************************
@@ -454,16 +465,19 @@ game :: proc() {
 
 				// ray.DrawPlane({0, -0.1, 0}, {f32(gw), f32(gh)}, ray.DARKGRAY)
 
-				ray.DrawLine3D(c0, c1, ray.YELLOW) // N
-				ray.DrawLine3D(c1, c2, ray.BLUE) // E
-				ray.DrawLine3D(c2, c3, ray.PINK) // S
-				ray.DrawLine3D(c3, c0, ray.GREEN) // W
-
-
+				// ray.DrawLine3D(c0, c1, ray.YELLOW) // N
+				// ray.DrawLine3D(c1, c2, ray.BLUE) // E
+				// ray.DrawLine3D(c2, c3, ray.PINK) // S
+				// ray.DrawLine3D(c3, c0, ray.GREEN) // W
 				// ray.DrawSphere(c0, -0.2, ray.PINK)
 				// ray.DrawSphere(c1, -0.2, ray.PURPLE)
 				// ray.DrawSphere(c2, -0.2, ray.ORANGE)
 				// ray.DrawSphere(c3, -0.2, ray.GREEN)
+
+				ray.DrawLine3D(c0, c1, ray.GRAY) // N
+				ray.DrawLine3D(c1, c2, ray.GRAY) // E
+				ray.DrawLine3D(c2, c3, ray.GRAY) // S
+				ray.DrawLine3D(c3, c0, ray.GRAY) // W
 
 				// ray.BeginShaderMode(shader)
 				// {
@@ -472,8 +486,15 @@ game :: proc() {
 				for span in spans {
 					ray.DrawLine3D(span.startPos, span.endPos, span.color)
 				}
-				// drawHexagon(UV{20, 20}, 10)
-				ray.DrawSphere({0, 0, 0}, 0.05, ray.PINK)
+
+				drawHexagon(UV{0, 0}, 10)
+
+				if (itsaHit) {
+					drawTriangle(targetTriangle, 1)
+				}
+
+				// Show Origin
+				ray.DrawSphere({0, 0, 0}, 0.02, ray.WHITE)
 				// }
 			}
 
@@ -511,10 +532,10 @@ game :: proc() {
 			)
 
 			arrow := "▲▼"
-			if (targetTriangle.upOrDown == "Up") {
+			if (targetTriangle.chirality == .Positive) {
 				arrow = "▲"
 			}
-			if (targetTriangle.upOrDown == "Down") {
+			if (targetTriangle.chirality == .Negative) {
 				arrow = "▼"
 			}
 
@@ -557,25 +578,22 @@ game :: proc() {
 				ray.WHITE,
 			)
 
-			// if (groundHitInfo.hit) {
+			if (groundHitInfo.hit) {
 
-			// 	ray.DrawRectangle(
-			// 		i32(mousePosition.x + 2),
-			// 		i32(mousePosition.y) - 16,
-			// 		150,
-			// 		16,
-			// 		ray.DARKGRAY,
-			// 	)
-			// 	drawDebugText(
-			// 		mousePosition + {4, -15},
-			// 		"%s [%+2.0f:%+2.0f:%+2.0f] %s",
-			// 		arrow,
-			// 		targetTriangle.u,
-			// 		targetTriangle.v,
-			// 		targetTriangle.w,
-			// 		arrow,
-			// 	)
-			// }
+				debugText := "DEBUG\n----------------------------\n %s"
+				numLines: i32 = 3
+				x: f32 = 28
+				y: f32 = 72
+
+				ray.DrawRectangle(
+					i32(mousePosition.x + x),
+					i32(mousePosition.y + y),
+					200,
+					16 * numLines,
+					ray.DARKGRAY,
+				)
+				drawDebugText(mousePosition + {x + 2, y + 1}, debugText, debugMessage)
+			}
 		}
 
 		// if len(tracking_allocator.bad_free_array) > 0 {

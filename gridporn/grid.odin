@@ -13,8 +13,8 @@ import ray "vendor:raylib"
 
 genSpans :: proc(point: Point) -> [6]Span {
 
-	u := cast(f32)point.uv[0]
-	v := cast(f32)point.uv[1]
+	u := cast(f32)point.uv.u
+	v := cast(f32)point.uv.v
 
 	// log.info("Point:", point.uv)
 
@@ -76,13 +76,21 @@ genSpans :: proc(point: Point) -> [6]Span {
 	// log.info(a, b, c, d, e, f)
 	// log.info(b, c, d)
 
+	// return [6]Span {
+	// 	{startPos = point.vec, endPos = a, color = ray.RED},
+	// 	{startPos = point.vec, endPos = b, color = ray.ORANGE},
+	// 	{startPos = point.vec, endPos = c, color = ray.YELLOW},
+	// 	{startPos = point.vec, endPos = d, color = ray.GREEN},
+	// 	{startPos = point.vec, endPos = e, color = ray.BLUE},
+	// 	{startPos = point.vec, endPos = f, color = ray.VIOLET},
+	// }
 	return [6]Span {
-		{startPos = point.vec, endPos = a, color = ray.RED},
-		{startPos = point.vec, endPos = b, color = ray.ORANGE},
-		{startPos = point.vec, endPos = c, color = ray.YELLOW},
-		{startPos = point.vec, endPos = d, color = ray.GREEN},
-		{startPos = point.vec, endPos = e, color = ray.BLUE},
-		{startPos = point.vec, endPos = f, color = ray.VIOLET},
+		{startPos = point.vec, endPos = a, color = ray.GRAY},
+		{startPos = point.vec, endPos = b, color = ray.GRAY},
+		{startPos = point.vec, endPos = c, color = ray.GRAY},
+		{startPos = point.vec, endPos = d, color = ray.GRAY},
+		{startPos = point.vec, endPos = e, color = ray.GRAY},
+		{startPos = point.vec, endPos = f, color = ray.GRAY},
 	}
 
 }

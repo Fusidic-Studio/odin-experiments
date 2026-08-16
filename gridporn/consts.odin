@@ -6,7 +6,7 @@ import "core:math"
 isoMagicNumber: f32 = math.SQRT_THREE / 2
 // isoMagicNumber := f64(1)
 
-squareGrid: int : 11
+squareGrid: int : 21
 gridWidth: int : squareGrid
 gridHeight: int : squareGrid
 gridArea := gridWidth * gridHeight
