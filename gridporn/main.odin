@@ -393,51 +393,26 @@ game :: proc() {
 
 			sqrt3x := (math.SQRT_THREE * mouseTarget.x)
 
-			squiffiffyU := sqrt3x - mouseTarget.z
-			targetU := math.copy_sign(
-				math.trunc((math.abs(squiffiffyU)) / math.SQRT_THREE) + 1,
-				squiffiffyU,
-			)
+			targetU := math.floor((sqrt3x - mouseTarget.z) / math.SQRT_THREE)
+			targetW := -math.ceil((sqrt3x + mouseTarget.z) / math.SQRT_THREE)
+			targetV := math.floor(mouseTarget.z / isoMagicNumber)
 
-			squiffiffyX := sqrt3x + mouseTarget.z
-			targetW := math.copy_sign(
-				math.trunc((math.abs(squiffiffyX)) / math.SQRT_THREE) + 1,
-				squiffiffyX,
-			)
-
-			targetV := math.copy_sign(
-				math.trunc(math.abs(mouseTarget.z) / isoMagicNumber) + 1,
-				mouseTarget.z,
-			)
-
-			targetSum := targetU + targetV + (targetW * -1)
-
-			targetSignSum := math.sign(targetU) + math.sign(targetV) + math.sign(targetW)
-
-			targetSumSum := targetSum + (targetSignSum * 2)
+			targetSum := math.abs(targetU + targetV + targetW)
 
 			chirality: Chirality = .Unknown
 
-			switch targetSumSum {
-			case -7:
-				chirality = .Positive
-			case -6:
-				chirality = .Negative
-			case -2:
-				chirality = .Positive
-			case -1:
-				chirality = .Negative
+			switch targetSum {
 			case 1:
-				chirality = .Positive
+				chirality = .Negative
 			case 2:
-				chirality = .Negative
-			case 6:
 				chirality = .Positive
-			case 7:
-				chirality = .Negative
-			}
-			targetTriangle = {targetU, targetV, targetW, chirality}
+			case:
+				{
+					chirality = .Unknown
+					panic(fmt.tprintf("Target Sum Unexpected %d", targetSum))
+				}}
 
+			targetTriangle = {targetU, targetV, targetW, chirality}
 
 		} else {
 			targetTriangle = {-0, -0, -0, .Unknown}
@@ -487,18 +462,22 @@ game :: proc() {
 					ray.DrawLine3D(span.startPos, span.endPos, span.color)
 				}
 
-				drawHexagon(UV{0, 0}, 10)
+				limitingHex := drawHexagon(UV{2, 4}, 2)
 
 				if (itsaHit) {
-					drawTriangle(targetTriangle, 1)
+					triColor := ray.RED
+					if (withinHex(targetTriangle, limitingHex)) {
+						triColor = ray.GREEN
+					}
+					drawTriangle(targetTriangle, 1, triColor)
 				}
 
-				// Show Origin
+				// MARK: Show Origin
 				ray.DrawSphere({0, 0, 0}, 0.02, ray.WHITE)
 				// }
 			}
 
-			// Debuggery
+			// MARK: Debuggery
 			setDebugFont(fairfaxTTF)
 			debugTextSpacing: f32 : 14
 			debugTextOffset: f32 : 25
@@ -542,10 +521,11 @@ game :: proc() {
 			debugTextLineNumber = debugTextLineNumber + 2
 			drawDebugText(
 				{debugTextIndent, debugTextOffset + (debugTextSpacing * debugTextLineNumber)},
-				"Target Triangle: [%+2.0f:%+2.0f:%+2.0f] :%s",
+				"Target Triangle: [%+2.0f:%+2.0f:%+2.0f] =%+2.0f :%s",
 				targetTriangle.u,
 				targetTriangle.v,
 				targetTriangle.w,
+				math.abs(targetTriangle.u + targetTriangle.v + targetTriangle.w),
 				arrow,
 			)
 
@@ -578,8 +558,8 @@ game :: proc() {
 				ray.WHITE,
 			)
 
-			if (groundHitInfo.hit) {
-
+			// if (groundHitInfo.hit) {
+			if (debugMessage != "") {
 				debugText := "DEBUG\n----------------------------\n %s"
 				numLines: i32 = 3
 				x: f32 = 28

@@ -2,11 +2,12 @@ package gridporn
 
 import "core:fmt"
 import "core:log"
+import "core:math"
 import ray "vendor:raylib"
 
 heightOffset: f32 = 0.01
 
-drawTriangle :: proc(triangle: Triangle, size: f32) {
+drawTriangle :: proc(triangle: Triangle, size: f32, color: ray.Color = ray.WHITE) {
 	u := triangle.u
 	v := triangle.v
 
@@ -28,7 +29,7 @@ drawTriangle :: proc(triangle: Triangle, size: f32) {
 	// log.info("u", u, "abc", au, bu, cu)
 	// log.info("v", v, "abc", av, bv, cv)
 
-	ax := au + (0.5 * av)
+	ax := au + 0.5 * av
 	bx := bu + 0.5 * bv
 	cx := cu + 0.5 * cv
 
@@ -38,7 +39,7 @@ drawTriangle :: proc(triangle: Triangle, size: f32) {
 
 	a, b, c: ray.Vector3
 
-	debugMessage = fmt.tprintf("ax:%f", ax)
+	//debugMessage = fmt.tprintf("ax:%f", ax)
 
 	a = {ax, heightOffset, az}
 	b = {bx, heightOffset, bz}
@@ -47,17 +48,23 @@ drawTriangle :: proc(triangle: Triangle, size: f32) {
 	// log.info("Draw Triangle:", triangle)
 	// log.info(a, b, c)
 
-	ray.DrawSphere(a, 0.02, ray.RED)
-	ray.DrawSphere(b, 0.02, ray.GREEN)
-	ray.DrawSphere(c, 0.02, ray.BLUE)
+	// ray.DrawSphere(a, 0.02, ray.RED)
+	// ray.DrawSphere(b, 0.02, ray.GREEN)
+	// ray.DrawSphere(c, 0.02, ray.BLUE)
 
-	ray.DrawLine3D(a, b, ray.YELLOW)
-	ray.DrawLine3D(b, c, ray.YELLOW)
-	ray.DrawLine3D(c, a, ray.YELLOW)
+	// ray.DrawLine3D(a, b, ray.YELLOW)
+	// ray.DrawLine3D(b, c, ray.YELLOW)
+	// ray.DrawLine3D(c, a, ray.YELLOW)
+
+
+	ray.DrawLine3D(a, b, color)
+	ray.DrawLine3D(b, c, color)
+	ray.DrawLine3D(c, a, color)
+
 
 }
 
-drawHexagon :: proc(origin: UV, size: int) {
+drawHexagon :: proc(origin: UV, size: int) -> Hexagon {
 
 	u := origin.u
 	v := origin.v
@@ -116,5 +123,39 @@ drawHexagon :: proc(origin: UV, size: int) {
 	ray.DrawLine3D(e, f, ray.RED)
 	ray.DrawLine3D(f, a, ray.RED)
 
+	return Hexagon{{u, v}, size}
+
+}
+
+
+withinHex :: proc(triangle: Triangle, hex: Hexagon) -> bool {
+
+	northBound := hex.center.v - hex.size
+	southBound := hex.center.v + hex.size
+
+	if (int(triangle.v) < northBound || int(triangle.v) >= southBound) {
+		return false
+	}
+
+	swBound := hex.center.u - hex.size
+	neBound := hex.center.u + hex.size
+
+	if (int(triangle.u) < swBound || int(triangle.u) >= neBound) {
+		return false
+	}
+
+	w := int(triangle.u + triangle.v)
+	hexW := math.abs((-hex.center.u - hex.center.v) + int(triangle.chirality))
+
+	// debugMessage = fmt.tprintf("%d. %d", int(triangle.chirality), hexW)
+
+	nwBound := (hexW) - hex.size
+	seBound := (hexW) + hex.size
+
+	if (w <= nwBound || w > seBound) {
+		return false
+	}
+
+	return true
 
 }

@@ -18,7 +18,6 @@ genSpans :: proc(point: Point) -> [6]Span {
 
 	// log.info("Point:", point.uv)
 
-
 	au := f32(u)
 	bu := f32(u + spanLength)
 	cu := f32(u + spanLength)

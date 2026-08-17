@@ -3,9 +3,9 @@ package gridporn
 import ray "vendor:raylib"
 
 Chirality :: enum {
-	Positive,
-	Negative,
-	Unknown,
+	Unknown, // 0
+	Negative, // 1 = Down
+	Positive, // 2 = Up
 }
 
 UV :: struct {
@@ -29,4 +29,9 @@ Point :: struct {
 Triangle :: struct {
 	u, v, w:   f32,
 	chirality: Chirality,
+}
+
+Hexagon :: struct {
+	center: UV,
+	size:   int,
 }
