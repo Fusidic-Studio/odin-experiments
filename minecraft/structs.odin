@@ -40,3 +40,21 @@ World :: struct {
 	zero, max:                               ray.Vector2,
 	top, bottom, left, right, width, height: i32,
 }
+
+Window :: struct {
+	// TODO: Rename to Screen?
+	scaleDPI, position:                          ray.Vector2,
+	renderWidth, renderHeight, screenW, screenH: i32,
+}
+
+Panels :: enum {
+	All,
+	Demo,
+	Style,
+	Log,
+	GoTo,
+}
+
+Mouse :: struct {
+	target, position, wheel: ray.Vector2,
+}
