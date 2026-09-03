@@ -1,5 +1,6 @@
 package minecraft
 
+import "core:fmt"
 import "core:math"
 import ray "vendor:raylib"
 
@@ -94,6 +95,25 @@ drawWorld :: proc(world: World, mouseTarget: ray.Vector2) {
 		2,
 		ray.Color{252, 186, 3, 127},
 	)
+
+	for marker in markers {
+		x := marker.position.x
+		y := marker.position.y
+		ray.DrawTriangle({x, y - 5}, {x - 7, y + 5}, {x + 7, y + 5}, ray.RED)
+
+		text := fmt.ctprintf("[%f, %f]", x, y)
+		textSize := ray.MeasureTextEx(debugFont, text, fontSize, fontSpacing)
+
+		ray.DrawRectangle(
+			i32(x + 16),
+			i32(y - 2),
+			i32(textSize.x + 4),
+			i32(textSize.y + 4),
+			ray.Color{50, 50, 50, 255},
+		)
+
+		ray.DrawTextEx(debugFont, text, {x + 18, y - 1}, fontSize, fontSpacing, ray.LIGHTGRAY)
+	}
 
 	// MARK: End Main World Drawing
 	ray.EndMode2D()

@@ -58,3 +58,9 @@ Panels :: enum {
 Mouse :: struct {
 	target, position, wheel: ray.Vector2,
 }
+
+Marker :: struct {
+	position: ray.Vector2,
+}
+
+markers: [dynamic]Marker
