@@ -17,6 +17,7 @@ import ray "vendor:raylib"
 debugMessage: string
 lastMouseWheel: f32 = 0.0
 showDebuggery := false
+camera: ray.Camera2D
 
 guiState := struct {
 	panels:          map[Panels]struct{},
@@ -67,7 +68,11 @@ main :: proc() {
 		}
 
 		for _, value in a.allocation_map {
-			fmt.printf("%v: Leaked %v bytes\n", value.location, value.size)
+			fmt.printf(
+				ansi.CSI + ansi.FG_RED + ansi.SGR + "%v: Leaked %v bytes\n" + "\x1b[0m",
+				value.location,
+				value.size,
+			)
 			err = true
 		}
 
@@ -260,7 +265,7 @@ game :: proc() {
 	ray.HideCursor()
 
 	// MARK: Primary Camera
-	camera := ray.Camera2D {
+	camera = ray.Camera2D {
 		offset   = {logicalCenter.x, logicalCenter.y},
 		target   = DEFAULT_CAMERA_TARGET,
 		rotation = 0,
@@ -305,7 +310,10 @@ game :: proc() {
 				toggleGoTo()
 			}
 
+
 			if (len(guiState.panels) > 0) {
+
+				// Input Handling Defered to GUI
 
 				for button_rl, button_mu in gui_mouse_buttons_map {
 					switch {
@@ -338,13 +346,15 @@ game :: proc() {
 						}
 					}
 				}
-
-				// FIXME HANDLE GOTO
-				// if (gotoIsVisible) {
-				// 	handleGoTo()
-				// }
 				break inputHandling
 			}
+
+			if (ray.IsMouseButtonReleased(.LEFT)) {
+				position := ray.GetScreenToWorld2D(mouse.position, camera)
+				log.infof("Left Mouse Click at %f", position)
+				append(&markers, Marker{position})
+			}
+
 
 			if (ray.IsKeyDown(.LEFT_SHIFT)) {
 				camera_move_delta = camera_move_delta * 10
@@ -534,8 +544,6 @@ game :: proc() {
 			// 	libc.getchar()
 			// 	panic("Bad free detected")
 			// }
-
-			// free_all(context.temp_allocator)
 		}
 
 		// MARK: Game Close Actions
@@ -544,6 +552,8 @@ game :: proc() {
 
 			// Clean Up Global State
 			delete(guiState.panels)
+			gui_reset_log()
+
 			ray.UnloadRenderTexture(renderTarget)
 
 			ray.CloseWindow()

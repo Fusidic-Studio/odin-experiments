@@ -356,7 +356,7 @@ write_log :: proc(str: string) {
 read_log :: proc() -> string {
 	return string(guiState.log_buf[:guiState.log_buf_len])
 }
-reset_log :: proc() {
+gui_reset_log :: proc() {
 	guiState.log_buf_updated = true
 	guiState.log_buf_len = 0
 }
